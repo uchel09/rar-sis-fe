@@ -34,11 +34,11 @@ export function useAcademicYears() {
   return useQuery<AcademicYearListResponse>({
     queryKey: ["academicYears"],
     queryFn: () => fetcher<AcademicYearListResponse>("/academic-years"),
-    staleTime: Infinity, // ⏱ data dianggap selalu fresh, gak auto refetch
-    gcTime: Infinity, // ♻️ simpan cache selamanya selama app jalan
-    refetchOnWindowFocus: false, // 🚫 jangan refetch tiap pindah tab
-    refetchOnReconnect: false, // 🚫 jangan refetch tiap reconnect network
-    refetchInterval: false, // 🚫 jangan polling
+    staleTime: Infinity, 
+    gcTime: Infinity, 
+    refetchOnWindowFocus: false, 
+    refetchOnReconnect: false,
+    refetchInterval: false, 
   });
 }
 
@@ -46,9 +46,30 @@ export function useAcademicYears() {
 export function useAcademicYear(id: string) {
   return useQuery<AcademicYearResponse>({
     queryKey: ["academicYear", id],
-    queryFn: () => fetcher<AcademicYearResponse>(`/academic-years/${id}`),
+    queryFn: async () => {
+      const res = await fetcher<{ data: AcademicYearResponse }>(
+        `/academic-years/${id}`
+      );
+      return res.data;
+    },
     enabled: !!id,
     staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+
+export function useAcademicYearActive() {
+  return useQuery<AcademicYearResponse>({
+    queryKey: ["academicYearActive"],
+    queryFn: async () => {
+      const res = await fetcher<{ data: AcademicYearResponse }>(
+        "/academic-years/active"
+      );
+      return res.data; 
+    },
+    staleTime: Infinity, // cache selama app jalan
     gcTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -97,4 +118,3 @@ export function useDeleteAcademicYear() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["academicYears"] }),
   });
 }
-

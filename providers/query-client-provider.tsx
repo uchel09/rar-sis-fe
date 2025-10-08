@@ -1,9 +1,16 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode, createContext, useContext, useState } from "react";
+import {
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+} from "react";
 import NextTopLoader from "nextjs-toploader";
 import { ConfigProvider, message, notification, Modal } from "antd";
+
+import { DataInitializerProvider } from "@/providers/data-initializer-provider";
 
 interface AppMessageContextProps {
   messageApi: typeof message;
@@ -50,6 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             },
           }}
         >
+          <DataInitializerProvider />
           {children}
         </ConfigProvider>
       </QueryClientProvider>

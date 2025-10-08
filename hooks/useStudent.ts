@@ -10,7 +10,7 @@ export interface CreateStudentRequest {
   schoolId: string;
   classId?: string;
   enrollmentNumber: string;
-  dob: string; // lebih aman string (ISO), bukan Date langsung
+  dob: string; 
   address?: string;
   parentIds?: string[];
 }
@@ -32,8 +32,8 @@ export interface StudentResponse {
   schoolId: string;
   class?: {
     id: string;
-    name: string; // ✅ ambil field nama class
-    grade: string; // kalau ada field tambahan
+    name: string; 
+    grade: string; 
   } | null;
   enrollmentNumber: string;
   dob: Date;

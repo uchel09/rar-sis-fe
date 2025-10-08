@@ -12,6 +12,7 @@ import {
   DatePicker,
   Space,
   Popconfirm,
+  Switch,
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -55,6 +56,7 @@ function TeacherPage() {
       nip: record.nip,
       dob: dayjs(record.dob),
       hireDate: record.hireDate ? dayjs(record.hireDate) : undefined,
+      isActive: record.isActive
     });
     setOpen(true);
   };
@@ -66,10 +68,13 @@ function TeacherPage() {
         ...values,
         dob: values.dob.toISOString(),
         hireDate: values.hireDate?.toISOString(),
+        password: "guru1234",
+        schoolId: process.env.NEXT_PUBLIC_SCHOOL_ID,
       };
 
       if (editingTeacher) {
         await updateTeacher.mutateAsync(payload, {
+          
           onSuccess: () => {
             messageApi.success("Teacher updated");
             setOpen(false);
@@ -221,6 +226,15 @@ function TeacherPage() {
           <Form.Item name="hireDate" label="Hire Date">
             <DatePicker style={{ width: "100%" }} />
           </Form.Item>
+          {editingTeacher && (
+            <Form.Item
+              name="isActive"
+              label="Is Active"
+              valuePropName="checked" // supaya Switch mengikat boolean
+            >
+              <Switch />
+            </Form.Item>
+          )}
         </Form>
       </Drawer>
     </div>
