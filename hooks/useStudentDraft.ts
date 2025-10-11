@@ -89,6 +89,7 @@ export interface StudentDraftResponse {
   rejectionReason?: string;
 
   parents: {
+    dob:  Date;
     id?: string;
     fullName: string;
     phone: string;

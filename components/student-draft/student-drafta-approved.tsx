@@ -14,12 +14,7 @@ import {
   Popconfirm,
   message,
 } from "antd";
-import {
-
-  EditOutlined,
-  DeleteOutlined,
-  EyeFilled,
-} from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, EyeFilled } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useAppMessage } from "@/providers/query-client-provider";
 import {
@@ -32,6 +27,8 @@ import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
 import { Divider } from "antd";
 import { Modal } from "antd";
+import { CreateStudentRequest, useCreateStudent } from "@/hooks/useStudent";
+import { useCreateParent } from "@/hooks/useParent";
 
 const { Option } = Select;
 
@@ -47,6 +44,8 @@ function StudentDraftApprovedTabs() {
   const { data, isLoading } = useStudentDraftsApproved();
   const updateDraft = useUpdateStudentDraft(updateId || "");
   const deleteDraft = useDeleteStudentDraft();
+  const createStudent = useCreateStudent();
+  const createParent = useCreateParent();
 
   // For academic year dropdown
   const { data: activeAcademicYear } = useAcademicYearActive();
@@ -55,8 +54,6 @@ function StudentDraftApprovedTabs() {
   const [selectedParents, setSelectedParents] = useState<any[]>([]);
 
   const [form] = Form.useForm();
-
-  console.log(data)
 
 
   const handleEdit = (record: StudentDraftResponse) => {
@@ -86,25 +83,55 @@ function StudentDraftApprovedTabs() {
     setOpen(true);
   };
   const handleApprove = async (record: StudentDraftResponse) => {
-    if (record.status !== DraftStatus.PENDING) return;
+    if (record.status !== DraftStatus.APPROVED) return;
     setUpdateId(record.id);
+
     try {
-      await updateDraft.mutateAsync(
-        {
-          ...record,
-          status: DraftStatus.APPROVED_PENDING, // ubah status
+      // 1️⃣ Buat semua parent dari array record.parent[]
+      const parentIds: string[] = [];
+
+      for (const p of record.parents || []) {
+        const parentPayload = {
+          email: p.email,
+          password: "orangtua123",
+          fullName: p.fullName,
+          phone: p.phone,
+          address: p.address,
+          nik: p.nik,
+          gender: p.gender,
+          isActive: true
+        };
+
+        const createdParent = await createParent.mutateAsync(parentPayload);
+        parentIds.push(createdParent.id);
+        console.log(createdParent)
+      }
+      console.log(parentIds)
+
+      const studentPayload: CreateStudentRequest = {
+        email: record.email,
+        password: "siswa123",
+        fullName: record.fullName,
+        schoolId: `${process.env.NEXT_PUBLIC_SCHOOL_ID}`,
+        classId: record.targetClassId,
+        enrollmentNumber: record.enrollmentNumber,
+        dob: record.dob,
+        isActive: true,
+        address: record.address,
+        gender: record.gender,
+        parentIds: parentIds,
+      };
+
+      await createStudent.mutateAsync(studentPayload, {
+        onSuccess: () => {
+          messageApi.success("Student created");
+          setOpen(false);
         },
-        {
-          onSuccess: () => {
-            messageApi.success("Student Draft approved");
-          },
-          onError: (err: any) => {
-            messageApi.error(err.message);
-          },
-        }
-      );
-    } catch (error) {
+        onError: (err: any) => messageApi.error(err.message),
+      });
+    } catch (error: any) {
       console.error(error);
+      messageApi.error(error.message || "Failed to approve draft");
     }
   };
 

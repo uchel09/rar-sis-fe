@@ -11,9 +11,10 @@ export interface CreateParentRequest {
   fullName: string;
   phone: string;
   address?: string;
-  dob: Date;
+  dob?: Date;
   nik: string;
   gender: Gender;
+  isActive: boolean
   studentIds?: string[]; // Optional list of student IDs to link
 }
 
@@ -26,6 +27,7 @@ export interface UpdateParentRequest {
   dob?: Date;
   nik?: string;
   gender: Gender;
+  isActive: boolean;
   studentIds?: string[]; // Update linked students
 }
 
@@ -35,6 +37,7 @@ export interface ParentResponse {
   address?: string;
   dob: Date;
   nik: string;
+  gender: Gender
   user: {
     id: string;
     fullName: string;
@@ -45,6 +48,7 @@ export interface ParentResponse {
     id: string;
     fullName: string;
   }[];
+  isActive: boolean
   createdAt: Date;
   updatedAt: Date;
 }
@@ -88,14 +92,17 @@ export function useCreateParent() {
   const qc = useQueryClient();
 
   return useMutation<ParentResponse, Error, CreateParentRequest>({
-    mutationFn: (data) =>
-      fetcher<ParentResponse>("/parents", {
+    mutationFn: async (data) => {
+      const res = await fetcher<{ data: ParentResponse }>("/parents", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
-      }),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["parents"], exact: true }),
+      });
+      return res.data; // ambil yang di dalam { data: result }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["parents"], exact: true });
+    },
   });
 }
 
