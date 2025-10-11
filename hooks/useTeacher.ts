@@ -1,6 +1,7 @@
 // src/hooks/useTeacher.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/api-helper";
+import { Gender } from "@/lib/enum";
 
 export interface CreateTeacherRequest {
   email: string;
@@ -11,6 +12,7 @@ export interface CreateTeacherRequest {
   nip?: string;
   hireDate: Date;
   dob: Date;
+  gender: Gender;
   phone: string;
   subjectClassTeacher?: { classId: string; subjectId: string }[];
 }
@@ -25,6 +27,7 @@ export interface UpdateTeacherRequest {
   nip?: string;
   hireDate?: Date;
   phone: string;
+  gener: Gender;
   isActive: boolean;
   subjectClassTeacher?: { classId: string; subjectId: string }[];
 }
@@ -41,6 +44,7 @@ export interface TeacherResponse {
     id: string;
     fullName: string;
     email: string;
+    gender: Gender;
   };
   subjectClassTeacher?: SubjectClassTeacherResponse[];
   isActive: boolean;

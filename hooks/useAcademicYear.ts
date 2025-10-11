@@ -10,7 +10,6 @@ export interface CreateAcademicYearRequest {
 }
 
 export interface UpdateAcademicYearRequest {
-  id: string;
   name?: string;
   startDate?: Date;
   endDate?: Date;

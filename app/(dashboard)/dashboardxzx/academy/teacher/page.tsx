@@ -13,6 +13,7 @@ import {
   Space,
   Popconfirm,
   Switch,
+  Select
 } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -23,6 +24,7 @@ import {
   useDeleteTeacher,
   TeacherResponse,
 } from "@/hooks/useTeacher";
+import { Gender } from "@/lib/enum";
 
 function TeacherPage() {
   const { data, isLoading } = useTeachers();
@@ -37,6 +39,7 @@ function TeacherPage() {
   const [editingTeacher, setEditingTeacher] = useState<TeacherResponse | null>(
     null
   );
+  console.log(data)
 
   const handleCreate = () => {
     setEditingTeacher(null);
@@ -56,7 +59,7 @@ function TeacherPage() {
       nip: record.nip,
       dob: dayjs(record.dob),
       hireDate: record.hireDate ? dayjs(record.hireDate) : undefined,
-      isActive: record.isActive
+      isActive: record.isActive,
     });
     setOpen(true);
   };
@@ -74,7 +77,6 @@ function TeacherPage() {
 
       if (editingTeacher) {
         await updateTeacher.mutateAsync(payload, {
-          
           onSuccess: () => {
             messageApi.success("Teacher updated");
             setOpen(false);
@@ -108,6 +110,7 @@ function TeacherPage() {
     { title: "Phone", dataIndex: "phone", key: "phone" },
     { title: "NIK", dataIndex: "nik", key: "nik" },
     { title: "NIP", dataIndex: "nip", key: "nip" },
+    { title: "Gender", dataIndex:["user", "gender"], key: "gender" },
     {
       title: "DOB",
       dataIndex: "dob",
@@ -191,6 +194,19 @@ function TeacherPage() {
             rules={[{ required: true, message: "Please input full name" }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            name="gender"
+            label="Gender"
+            rules={[{ required: true, message: "Please select gender" }]}
+          >
+            <Select placeholder="Select gender">
+              {Object.values(Gender).map((gender) => (
+                <Select.Option key={gender} value={gender}>
+                  {gender.replace("_", " ")}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item
             name="email"

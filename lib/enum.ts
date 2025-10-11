@@ -46,7 +46,8 @@ export enum Semester {
 export enum DraftStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
-  REJECTED = "REJECTED",
+  REJECTED = "REJECTED", // tahan kelas, atau tidak diterima untuk siswa baru
+  APPROVED_PENDING = "APPROVED_PENDING",
 }
 
 // ======================
@@ -56,6 +57,7 @@ export enum DraftType {
   NEW_ENROLLMENT = "NEW_ENROLLMENT", // siswa baru masuk
   TRANSFER_IN = "TRANSFER_IN", // pindahan masuk
   TRANSFER_OUT = "TRANSFER_OUT", // pindahan keluar
+  TRANSFER_UP ="TRANSFER_UP", // naik kelas
   GRADUATED = "GRADUATED", // sudah lulus
 }
 

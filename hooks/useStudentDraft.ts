@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/api-helper";
-import { DraftStatus, DraftType, Grade } from "@/lib/enum";
+import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 // =======================
 // 🧩 Interface Request/Response
 // =======================
@@ -14,6 +14,7 @@ export interface CreateStudentDraftRequest {
   enrollmentNumber?: string;
   dob: Date;
   address?: string;
+  gender: Gender;
   grade: Grade;
   createdBy?: string;
   verifiedBy?: string;
@@ -26,21 +27,22 @@ export interface CreateStudentDraftRequest {
     phone: string;
     address?: string;
     email: string;
+    nik: string;
+    gender: Gender;
   }[];
 
   draftType: DraftType;
-  status?: DraftStatus;
+  status?: DraftStatus; // default PENDING
 }
-
 export interface UpdateStudentDraftRequest {
   email?: string;
   fullName?: string;
   targetClassId?: string;
   enrollmentNumber?: string;
-  academicYearId?: string;
-  studentId: string;
   dob?: Date;
   address?: string;
+  academicYearId?: string;
+  gender: Gender;
   grade?: Grade;
   createdBy?: string;
   verifiedBy?: string;
@@ -53,12 +55,13 @@ export interface UpdateStudentDraftRequest {
     phone?: string;
     address?: string;
     email?: string;
+    nik?: string;
+    gender?: Gender;
   }[];
 
   draftType?: DraftType;
   status?: DraftStatus;
 }
-
 export interface StudentDraftResponse {
   id: string;
   email: string;
@@ -66,6 +69,7 @@ export interface StudentDraftResponse {
   schoolId: string;
   enrollmentNumber?: string;
   targetClassId?: string;
+  gender: Gender;
   academicYear: {
     id: string;
     name: string;
@@ -90,6 +94,8 @@ export interface StudentDraftResponse {
     phone: string;
     address?: string;
     email: string;
+    nik: string;
+    gender: Gender;
   }[];
 
   draftType: DraftType;
@@ -117,11 +123,33 @@ export function useStudentDrafts() {
     refetchOnReconnect: false,
   });
 }
+export function useStudentDraftsApprovePending() {
+  return useQuery<StudentDraftListResponse>({
+    queryKey: ["studentDraftsApprovePending"],
+    queryFn: () =>
+      fetcher<StudentDraftListResponse>("/student-drafts/approve-pending"),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
+export function useStudentDraftsApproved() {
+  return useQuery<StudentDraftListResponse>({
+    queryKey: ["studentDraftsApproved"],
+    queryFn: () =>
+      fetcher<StudentDraftListResponse>("/student-drafts/approved"),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}
 
 // ✅ Ambil Student Draft berdasarkan ID
 export function useStudentDraft(id: string) {
   return useQuery<StudentDraftResponse>({
-    queryKey: ["studentDraft", id],
+ queryKey: ["studentDraft", id],
     queryFn: async () => {
       const res = await fetcher<{ data: StudentDraftResponse }>(
         `/student-drafts/${id}`
@@ -155,6 +183,7 @@ export function useCreateStudentDraft() {
 }
 
 // ✅ Update Student Draft
+// ✅ Update Student Draft
 export function useUpdateStudentDraft(id: string) {
   const qc = useQueryClient();
   return useMutation<StudentDraftResponse, Error, UpdateStudentDraftRequest>({
@@ -165,8 +194,17 @@ export function useUpdateStudentDraft(id: string) {
         headers: { "Content-Type": "application/json" },
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["studentDrafts"] });
-      qc.invalidateQueries({ queryKey: ["studentDraft", id] });
+      // Refresh list approve pending
+      qc.invalidateQueries({
+        queryKey: ["studentDraftsApprovePending"],
+        exact: true,
+      });
+      qc.invalidateQueries({
+        queryKey: ["studentDraftsApproved"],
+        exact: true,
+      });
+      qc.invalidateQueries({ queryKey: ["studentDrafts"], exact: true });
+      qc.invalidateQueries({ queryKey: ["studentDraft", id], exact: true });
     },
   });
 }
