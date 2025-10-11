@@ -104,7 +104,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
       if (pathname.includes("/academy/time-table")) return ["2-5"];
       if (pathname.includes("/academy/attendance")) return ["2-6"];
       if (pathname.includes("/academy/academic-year")) return ["2-7"];
-      if (pathname.includes("/announcement")) return ["2-8"];
+      if (pathname.includes("/academy/parent")) return ["2-8"];
       if (pathname.includes("/administration/payment")) return ["3-1"];
       if (pathname.includes("/report-statistic")) return ["3-4"];
       // dst mapping sesuai kebutuhan
@@ -174,7 +174,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           key: "2-8",
           icon: <BellOutlined />,
           label: (
-            <Link href="/dashboardxzx/academy/announcement">Pengumuman</Link>
+            <Link href="/dashboardxzx/academy/parent">Parents</Link>
           ),
         },
         {
