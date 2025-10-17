@@ -96,7 +96,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
     if (!pathname) return ["1"];
 
     if (pathname.includes("/dashboardxzx")) {
-      if (pathname.includes("/student-draft")) return ["2-9"];
+      if (pathname.includes("/academy/student-draft")) return ["2-9"];
       if (pathname.includes("/academy/student")) return ["2-1"];
       if (pathname.includes("/academy/teacher")) return ["2-2"];
       if (pathname.includes("/academy/school-class")) return ["2-3"];
@@ -106,7 +106,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
       if (pathname.includes("/academy/academic-year")) return ["2-7"];
       if (pathname.includes("/academy/parent")) return ["2-8"];
       if (pathname.includes("/administration/payment")) return ["3-1"];
-      if (pathname.includes("/report-statistic")) return ["3-4"];
+      if (pathname.includes("/administration/ppdb")) return ["3-4"];
       // dst mapping sesuai kebutuhan
       return ["1"];
     }
@@ -173,18 +173,12 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         {
           key: "2-8",
           icon: <BellOutlined />,
-          label: (
-            <Link href="/dashboardxzx/academy/parent">Parents</Link>
-          ),
+          label: <Link href="/dashboardxzx/academy/parent">Parents</Link>,
         },
         {
           key: "2-9",
           icon: <TeamOutlined />,
-          label: (
-            <Link href="/dashboardxzx/academy/student-draft">
-              Daftar Pengantar Siswa
-            </Link>
-          ),
+          label: <Link href="/dashboardxzx/academy/student-draft">Pengantar Siswa</Link>,
         },
       ],
     },
@@ -222,13 +216,12 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         },
         {
           key: "3-4",
-          icon: <DashboardOutlined />,
+          icon: <BookOutlined />,
           label: (
-            <Link href="/dashboardxzx/academy/report-statistic">
-              Laporan & Statistik
-            </Link>
+            <Link href="/dashboardxzx/administration/ppdb">PPDB</Link>
           ),
         },
+      
       ],
     },
     {

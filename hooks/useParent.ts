@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/api-helper";
 import { Gender } from "@/lib/enum";
+import { CreateStudentRequest } from "./useStudent";
 
 // =======================
 // 🧩 Request / Response
@@ -14,7 +15,7 @@ export interface CreateParentRequest {
   dob?: Date;
   nik: string;
   gender: Gender;
-  isActive: boolean
+  isActive: boolean;
   studentIds?: string[]; // Optional list of student IDs to link
 }
 
@@ -37,7 +38,7 @@ export interface ParentResponse {
   address?: string;
   dob: Date;
   nik: string;
-  gender: Gender
+  gender: Gender;
   user: {
     id: string;
     fullName: string;
@@ -48,7 +49,7 @@ export interface ParentResponse {
     id: string;
     fullName: string;
   }[];
-  isActive: boolean
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -105,6 +106,35 @@ export function useCreateParent() {
     },
   });
 }
+export function useCreateParentStudentDraft() {
+  const qc = useQueryClient();
+
+  return useMutation<
+    { message: string },
+    Error,
+    {
+      parentRequests: CreateParentRequest[];
+      studentRequest: CreateStudentRequest;
+    }
+  >({
+    mutationFn: async (data) => {
+      const res = await fetcher<{ data: { message: string } }>(
+        "/parents/with-student",
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      return res.data; // berisi { message: "berhasil approve" }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["parents"], exact: true });
+      qc.invalidateQueries({ queryKey: ["students"], exact: true });
+    },
+  });
+}
+
 
 // ✅ Update parent
 export function useUpdateParent(id: string) {

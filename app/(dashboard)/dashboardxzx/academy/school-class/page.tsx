@@ -102,7 +102,7 @@ function ClassPage() {
   // === TABLE COLUMNS ===
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
+    { title: "Branch", dataIndex: "name", key: "name" },
     {
       title: "Grade",
       dataIndex: "grade",
