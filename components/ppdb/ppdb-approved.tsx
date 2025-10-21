@@ -23,12 +23,13 @@ import {
   useDeleteStudentDraft,
   StudentDraftResponse,
 } from "@/hooks/useStudentDraft";
+import {  useClassesByGrade } from "@/hooks/useClass";
 import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
 import { Divider } from "antd";
 import { Modal } from "antd";
 import { CreateStudentRequest } from "@/hooks/useStudent";
-import {  useCreateParentStudentDraft } from "@/hooks/useParent";
+import { useCreateParentStudentDraft } from "@/hooks/useParent";
 
 const { Option } = Select;
 
@@ -36,6 +37,7 @@ function PpdbApprovedTabs() {
   const { messageApi } = useAppMessage();
   const [open, setOpen] = useState(false);
   const [updateId, setUpdateId] = useState<string | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<Grade | undefined>();
   const [editingDraft, setEditingDraft] = useState<StudentDraftResponse | null>(
     null
   );
@@ -45,8 +47,8 @@ function PpdbApprovedTabs() {
   const updateDraft = useUpdateStudentDraft(updateId || "");
   const deleteDraft = useDeleteStudentDraft();
   const createParentStudentDraft = useCreateParentStudentDraft();
-
-
+  const { data: classData, isLoading: isLoadingClasses } =
+    useClassesByGrade(selectedGrade);
   // For academic year dropdown
   const { data: activeAcademicYear } = useAcademicYearActive();
 
@@ -55,11 +57,10 @@ function PpdbApprovedTabs() {
 
   const [form] = Form.useForm();
 
-
   const handleEdit = (record: StudentDraftResponse) => {
     setEditingDraft(record);
     setUpdateId(record.id);
-
+    setSelectedGrade(record.grade);
     form.setFieldsValue({
       email: record.email,
       fullName: record.fullName,
@@ -70,6 +71,8 @@ function PpdbApprovedTabs() {
       gender: record.gender,
       draftType: record.draftType,
       status: record.status,
+      targetClassId: record.targetClass?.id,
+      targetGrade: record.targetClass?.grade,
       parents:
         record.parents?.map((p) => ({
           fullName: p.fullName || "",
@@ -82,54 +85,55 @@ function PpdbApprovedTabs() {
     });
     setOpen(true);
   };
- const handleApprove = async (record: StudentDraftResponse) => {
-   if (record.status !== DraftStatus.APPROVED) return;
-   setUpdateId(record.id);
+  const handleApprove = async (record: StudentDraftResponse) => {
+    if (record.status !== DraftStatus.APPROVED) return;
+    if (record.targetClass?.grade !== record.grade) {
+      messageApi.error("harap update Target kelas yang sesuai terlebih dahulu");
+      return;
+    }
+    try {
+      // 🧩 Bentuk data parents dari draft
+      const parentRequests = (record.parents || []).map((p) => ({
+        email: p.email,
+        password: "orangtua123", // default password
+        fullName: p.fullName,
+        phone: p.phone,
+        address: p.address,
+        nik: p.nik,
+        gender: p.gender,
+        isActive: true,
+      }));
 
-   try {
-     // 🧩 Bentuk data parents dari draft
-     const parentRequests = (record.parents || []).map((p) => ({
-       email: p.email,
-       password: "orangtua123", // default password
-       fullName: p.fullName,
-       phone: p.phone,
-       address: p.address,
-       nik: p.nik,
-       gender: p.gender,
-       isActive: true,
-     }));
+      // 🧩 Bentuk data student dari draft
+      const studentRequest: CreateStudentRequest = {
+        email: record.email,
+        password: "siswa123",
+        fullName: record.fullName,
+        schoolId: `${process.env.NEXT_PUBLIC_SCHOOL_ID}`,
+        classId: record.targetClass?.id,
+        enrollmentNumber: record.enrollmentNumber,
+        dob: record.dob,
+        isActive: true,
+        address: record.address,
+        gender: record.gender,
+      };
 
-     // 🧩 Bentuk data student dari draft
-     const studentRequest: CreateStudentRequest = {
-       email: record.email,
-       password: "siswa123",
-       fullName: record.fullName,
-       schoolId: `${process.env.NEXT_PUBLIC_SCHOOL_ID}`,
-       classId: record.targetClassId,
-       enrollmentNumber: record.enrollmentNumber,
-       dob: record.dob,
-       isActive: true,
-       address: record.address,
-       gender: record.gender,
-     };
-
-     // 🚀 Kirim keduanya sekaligus ke endpoint /parents/with-student
-     await createParentStudentDraft.mutateAsync(
-       { parentRequests, studentRequest },
-       {
-         onSuccess: (res) => {
-           messageApi.success(res.message || "Berhasil approve draft!");
-           setOpen(false);
-         },
-         onError: (err: any) => messageApi.error(err.message),
-       }
-     );
-   } catch (error: any) {
-     console.error(error);
-     messageApi.error(error.message || "Gagal approve draft");
-   }
- };
-
+      // 🚀 Kirim keduanya sekaligus ke endpoint /parents/with-student
+      await createParentStudentDraft.mutateAsync(
+        { parentRequests, studentRequest },
+        {
+          onSuccess: (res) => {
+            messageApi.success(res.message || "Berhasil approve draft!");
+            setOpen(false);
+          },
+          onError: (err: any) => messageApi.error(err.message),
+        }
+      );
+    } catch (error: any) {
+      console.error(error);
+      messageApi.error(error.message || "Gagal approve draft");
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -142,7 +146,7 @@ function PpdbApprovedTabs() {
           Object.values(p).some((v) => v !== undefined && v !== "")
         ),
       };
-
+  
       if (editingDraft) {
         await updateDraft.mutateAsync(payload, {
           onSuccess: () => {
@@ -189,6 +193,13 @@ function PpdbApprovedTabs() {
       title: "Grade",
       dataIndex: "grade",
       key: "grade",
+    },
+    {
+      title: "Target Class",
+      dataIndex: ["targetClass", "name"],
+      key: "targetClass",
+      render: (_: any, record: any) =>
+        record.targetClass ? record.targetClass.name : "belum ditentukan",
     },
     {
       title: "Gender",
@@ -394,10 +405,55 @@ function PpdbApprovedTabs() {
             label="Grade"
             rules={[{ required: true, message: "Please select grade" }]}
           >
-            <Select placeholder="Select grade">
-              {Object.values(Grade).map((g) => (
-                <Option key={g} value={g}>
-                  {g}
+            <Select
+              placeholder="Select grade"
+              onChange={(value: Grade) => setSelectedGrade(value)}
+            >
+              {Object.values(Grade).map((g) => {
+                const gradeLabelMap: Record<Grade, string> = {
+                  [Grade.GRADE_1]: "Kelas I",
+                  [Grade.GRADE_2]: "Kelas II",
+                  [Grade.GRADE_3]: "Kelas III",
+                  [Grade.GRADE_4]: "Kelas IV",
+                  [Grade.GRADE_5]: "Kelas V",
+                  [Grade.GRADE_6]: "Kelas VI",
+                  [Grade.GRADE_7]: "Kelas VII",
+                  [Grade.GRADE_8]: "Kelas VIII",
+                  [Grade.GRADE_9]: "Kelas IX",
+                  [Grade.GRADE_10]: "Kelas X",
+                  [Grade.GRADE_11]: "Kelas XI",
+                  [Grade.GRADE_12]: "Kelas XII",
+                };
+
+                return (
+                  <Option key={g} value={g}>
+                    {gradeLabelMap[g] ?? g}{" "}
+                    {/* fallback kalau belum didefinisikan */}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="targetClassId"
+            label="Target Class"
+            rules={[{ required: true, message: "Please select target class" }]}
+          >
+            <Select
+              placeholder={
+                selectedGrade
+                  ? isLoadingClasses
+                    ? "Loading classes..."
+                    : "Select class"
+                  : "Select grade first"
+              }
+              loading={isLoadingClasses}
+              disabled={!selectedGrade || isLoadingClasses}
+            >
+              {classData?.data?.map((cls) => (
+                <Option key={cls.id} value={cls.id}>
+                  {cls.name}
                 </Option>
               ))}
             </Select>

@@ -14,12 +14,7 @@ import {
   Popconfirm,
   message,
 } from "antd";
-import {
-
-  EditOutlined,
-  DeleteOutlined,
-  EyeFilled,
-} from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, EyeFilled } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useAppMessage } from "@/providers/query-client-provider";
 import {
@@ -32,10 +27,10 @@ import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
 import { Divider } from "antd";
 import { Modal } from "antd";
-
+import { useClasses } from "@/hooks/useClass";
 const { Option } = Select;
 
-function  PpdbApprovePendingTabs() {
+function PpdbApprovePendingTabs() {
   const { messageApi } = useAppMessage();
   const [open, setOpen] = useState(false);
   const [updateId, setUpdateId] = useState<string | null>(null);
@@ -50,13 +45,12 @@ function  PpdbApprovePendingTabs() {
 
   // For academic year dropdown
   const { data: activeAcademicYear } = useAcademicYearActive();
+  const { data: classData, isLoading: isLoadingClasses } = useClasses();
 
   const [openModalParents, setOpenModalParents] = useState(false);
   const [selectedParents, setSelectedParents] = useState<any[]>([]);
 
   const [form] = Form.useForm();
-
-  console.log(data)
 
 
   const handleEdit = (record: StudentDraftResponse) => {
@@ -73,6 +67,7 @@ function  PpdbApprovePendingTabs() {
       gender: record.gender,
       draftType: record.draftType,
       status: record.status,
+      targetClassId: record.targetClass?.id,
       parents:
         record.parents?.map((p) => ({
           fullName: p.fullName || "",
@@ -380,6 +375,23 @@ function  PpdbApprovePendingTabs() {
             </Select>
           </Form.Item>
 
+          <Form.Item
+            name="targetClassId"
+            label="Target Class"
+            rules={[{ required: true, message: "Please select target class" }]}
+          >
+            <Select
+              placeholder="Select target class"
+              loading={isLoadingClasses}
+              disabled={isLoadingClasses}
+            >
+              {classData?.data?.map((cls) => (
+                <Select.Option key={cls.id} value={cls.id}>
+                  {cls.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
           <Form.Item
             name="draftType"
             label="Draft Type"

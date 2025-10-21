@@ -14,7 +14,6 @@ export interface CreateTeacherRequest {
   dob: Date;
   gender: Gender;
   phone: string;
-  subjectClassTeacher?: { classId: string; subjectId: string }[];
 }
 
 // Request DTO untuk UPDATE
@@ -29,34 +28,33 @@ export interface UpdateTeacherRequest {
   phone: string;
   gener: Gender;
   isActive: boolean;
-  subjectClassTeacher?: { classId: string; subjectId: string }[];
 }
 
-// Response DTO
 export interface TeacherResponse {
   id: string; // ID teacher
   nik: string;
   nip?: string;
   dob: Date;
-  hireDate?: Date;
+  hireDate: Date;
   phone: string;
+  isActive: boolean;
   user: {
+    gender: Gender;
     id: string;
     fullName: string;
     email: string;
-    gender: Gender;
   };
-  subjectClassTeacher?: SubjectClassTeacherResponse[];
-  isActive: boolean;
+  subjectTeachers: SubjectTeacherResponse[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface SubjectClassTeacherResponse {
+export interface SubjectTeacherResponse {
   id: string;
   subjectId: string;
-  classId: string;
+  subjectName: string;
   teacherId: string;
+  teacherFullName: string;
 }
 
 // ✅ Ambil semua teacher

@@ -126,6 +126,20 @@ export function useUpdateStudent(id: string) {
   });
 }
 
+export function useStudentsByClassId(classId: string) {
+  return useQuery<{ data: StudentResponse[] }>({
+    queryKey: ["students", "class", classId],
+    queryFn: () =>
+      fetcher<{ data: StudentResponse[] }>(`/students/class/${classId}`),
+    enabled: !!classId, // hanya jalan kalau classId ada
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+  });
+}
+
 // =======================
 // ✅ Delete student
 // =======================

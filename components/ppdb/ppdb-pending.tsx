@@ -31,6 +31,7 @@ import {
 } from "@/hooks/useStudentDraft";
 import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
+import { useClasses, useClassesByGrade } from "@/hooks/useClass";
 import { Divider } from "antd";
 import { Modal } from "antd";
 
@@ -45,10 +46,13 @@ function PpdbPendingTabs() {
   );
 
   // React Query hooks
+  const [selectedGrade, setSelectedGrade] = useState<Grade | undefined>();
   const { data, isLoading } = useStudentDrafts();
   const createDraft = useCreateStudentDraft();
   const updateDraft = useUpdateStudentDraft(updateId || "");
   const deleteDraft = useDeleteStudentDraft();
+  const { data: classData, isLoading: isLoadingClasses } =
+    useClassesByGrade(selectedGrade);
 
   // For academic year dropdown
   const { data: activeAcademicYear } = useAcademicYearActive();
@@ -79,6 +83,7 @@ function PpdbPendingTabs() {
       gender: record.gender,
       draftType: record.draftType,
       status: record.status,
+      targetClassId: record.targetClass?.id,
       parents:
         record.parents?.map((p) => ({
           fullName: p.fullName || "",
@@ -92,7 +97,7 @@ function PpdbPendingTabs() {
     setOpen(true);
   };
   const handleApprove = async (record: StudentDraftResponse) => {
-    if (record.status !== DraftStatus.PENDING) return
+    if (record.status !== DraftStatus.PENDING) return;
     setUpdateId(record.id);
     try {
       await updateDraft.mutateAsync(
@@ -391,16 +396,60 @@ function PpdbPendingTabs() {
           <Form.Item name="address" label="Address">
             <Input.TextArea placeholder="Optional address" rows={2} />
           </Form.Item>
-
           <Form.Item
             name="grade"
             label="Grade"
             rules={[{ required: true, message: "Please select grade" }]}
           >
-            <Select placeholder="Select grade">
-              {Object.values(Grade).map((g) => (
-                <Option key={g} value={g}>
-                  {g}
+            <Select
+              placeholder="Select grade"
+              onChange={(value: Grade) => setSelectedGrade(value)}
+            >
+              {Object.values(Grade).map((g) => {
+                const gradeLabelMap: Record<Grade, string> = {
+                  [Grade.GRADE_1]: "Kelas I",
+                  [Grade.GRADE_2]: "Kelas II",
+                  [Grade.GRADE_3]: "Kelas III",
+                  [Grade.GRADE_4]: "Kelas IV",
+                  [Grade.GRADE_5]: "Kelas V",
+                  [Grade.GRADE_6]: "Kelas VI",
+                  [Grade.GRADE_7]: "Kelas VII",
+                  [Grade.GRADE_8]: "Kelas VIII",
+                  [Grade.GRADE_9]: "Kelas IX",
+                  [Grade.GRADE_10]: "Kelas X",
+                  [Grade.GRADE_11]: "Kelas XI",
+                  [Grade.GRADE_12]: "Kelas XII",
+                };
+
+                return (
+                  <Option key={g} value={g}>
+                    {gradeLabelMap[g] ?? g}{" "}
+                    {/* fallback kalau belum didefinisikan */}
+                  </Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="targetClassId"
+            label="Target Class"
+            rules={[{ required: true, message: "Please select target class" }]}
+          >
+            <Select
+              placeholder={
+                selectedGrade
+                  ? isLoadingClasses
+                    ? "Loading classes..."
+                    : "Select class"
+                  : "Select grade first"
+              }
+              loading={isLoadingClasses}
+              disabled={!selectedGrade || isLoadingClasses}
+            >
+              {classData?.data?.map((cls) => (
+                <Option key={cls.id} value={cls.id}>
+                  {cls.name}
                 </Option>
               ))}
             </Select>

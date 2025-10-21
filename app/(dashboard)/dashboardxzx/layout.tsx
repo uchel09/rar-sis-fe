@@ -79,7 +79,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const pathname = usePathname(); // ✅ ambil path aktif
-  const router = useRouter();
+
 
   const userMenu = (
     <Menu
@@ -128,7 +128,13 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         {
           key: "2-1",
           icon: <TeamOutlined />,
-          label: <Link href="/dashboardxzx/academy/student">Siswa</Link>,
+          label: (
+            <Link
+              href={`/dashboardxzx/academy/student/GRADE_1`}
+            >
+              Siswa
+            </Link>
+          ),
         },
         {
           key: "2-2",
@@ -178,7 +184,11 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         {
           key: "2-9",
           icon: <TeamOutlined />,
-          label: <Link href="/dashboardxzx/academy/student-draft">Pengantar Siswa</Link>,
+          label: (
+            <Link href="/dashboardxzx/academy/student-draft">
+              Pengantar Siswa
+            </Link>
+          ),
         },
       ],
     },
@@ -217,11 +227,8 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         {
           key: "3-4",
           icon: <BookOutlined />,
-          label: (
-            <Link href="/dashboardxzx/administration/ppdb">PPDB</Link>
-          ),
+          label: <Link href="/dashboardxzx/administration/ppdb">PPDB</Link>,
         },
-      
       ],
     },
     {

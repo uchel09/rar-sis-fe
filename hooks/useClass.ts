@@ -13,7 +13,6 @@ export interface CreateClassRequest {
   name: string;
   academicYearId: string;
   grade: Grade;
-  subjectClassTeacher?: { teacherId: string; subjectId: string }[]; 
 }
 
 export interface UpdateClassRequest {
@@ -21,19 +20,12 @@ export interface UpdateClassRequest {
   name?: string;
   academicYearId?: string;
   grade?: Grade;
-  subjectTeachers?: { teacherId: string; subjectId: string }[]; 
+
 }
 
 // ======================
 // 🧩 Response DTOs
 // ======================
-
-export interface SubjectClassTeacherResponse {
-  id: string;
-  subjectId: string;
-  classId: string;
-  teacherId: string;
-}
 
 export interface ClassResponse {
   id: string;
@@ -49,7 +41,7 @@ export interface ClassResponse {
   grade: Grade;
   createdAt: Date;
   updatedAt: Date;
-  subjectClassTeacher?: SubjectClassTeacherResponse[];
+  
 }
 
 // ======================
@@ -82,6 +74,20 @@ export function useClass(id: string) {
   });
 }
 
+export function useClassesByGrade(grade?: Grade) {
+  return useQuery<{ data: ClassResponse[] }>({
+    queryKey: ["classes", grade],
+    queryFn: () =>
+      fetcher<{ data: ClassResponse[] }>(`/classes/grade?grade=${grade}`),
+    enabled: !!grade, // hanya jalan kalau grade ada
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+  });
+}
+
 // Create class
 export function useCreateClass() {
   const qc = useQueryClient();
@@ -93,7 +99,7 @@ export function useCreateClass() {
         headers: { "Content-Type": "application/json" },
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["classes"], exact: true });
+      qc.invalidateQueries({ queryKey: ["classes"]});
     },
   });
 }
@@ -109,7 +115,7 @@ export function useUpdateClass(id: string) {
         headers: { "Content-Type": "application/json" },
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["classes"], exact: true });
+      qc.invalidateQueries({ queryKey: ["classes"] });
       qc.invalidateQueries({ queryKey: ["class", id], exact: true });
     },
   });

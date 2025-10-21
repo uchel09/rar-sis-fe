@@ -27,7 +27,7 @@ import {
 } from "@/hooks/useStudent";
 import { Gender } from "@/lib/enum";
 
-function StudentPage1() {
+function StudentPage() {
   const { data, isLoading } = useStudents();
   const createStudent = useCreateStudent();
   const [updateId, setUpdateId] = useState<string | null>(null);
@@ -244,4 +244,4 @@ function StudentPage1() {
   );
 }
 
-export default StudentPage1;
+export default StudentPage;
