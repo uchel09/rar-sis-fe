@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -16,20 +15,20 @@ import {
   Switch,
   Select,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
-  useStudents,
-  useCreateStudent,
   useUpdateStudent,
   useDeleteStudent,
   StudentResponse,
+  useStudentsByClassId,
 } from "@/hooks/useStudent";
 import { Gender } from "@/lib/enum";
-
-function StudentPage() {
-  const { data, isLoading } = useStudents();
-  const createStudent = useCreateStudent();
+interface StudentAdminProps {
+  id: string;
+}
+function StudentPage({ id }: StudentAdminProps) {
+  const { data, isLoading } = useStudentsByClassId(id);
   const [updateId, setUpdateId] = useState<string | null>(null);
   const updateStudent = useUpdateStudent(updateId || "");
   const deleteStudent = useDeleteStudent();
@@ -40,13 +39,8 @@ function StudentPage() {
   const [editingStudent, setEditingStudent] = useState<StudentResponse | null>(
     null
   );
+  console.log(data)
 
-  const handleCreate = () => {
-    setEditingStudent(null);
-    setUpdateId(null);
-    form.resetFields();
-    setOpen(true);
-  };
 
   const handleEdit = (record: StudentResponse) => {
     setEditingStudent(record);
@@ -81,16 +75,6 @@ function StudentPage() {
           },
           onError: (err: any) => messageApi.error(err.message),
         });
-      } else {
-        payload.password = "student1234";
-        payload.isActive = true;
-        await createStudent.mutateAsync(payload, {
-          onSuccess: () => {
-            messageApi.success("Student created");
-            setOpen(false);
-          },
-          onError: (err: any) => messageApi.error(err.message),
-        });
       }
     } catch (error) {
       console.log(error);
@@ -105,11 +89,11 @@ function StudentPage() {
   };
 
   const columns = [
-    { title: "Full Name", dataIndex: ["user", "fullName"], key: "fullName" },
+    { title: "Nama ", dataIndex: ["user", "fullName"], key: "fullName" },
     { title: "Email", dataIndex: ["user", "email"], key: "email" },
     { title: "Gender", dataIndex: ["user", "gender"], key: "gender" },
     {
-      title: "Enrollment Number",
+      title: "NISN",
       dataIndex: "enrollmentNumber",
       key: "enrollmentNumber",
     },
@@ -120,7 +104,7 @@ function StudentPage() {
       key: "dob",
       render: (date: string) => dayjs(date).format("YYYY-MM-DD"),
     },
-    { title: "Address", dataIndex: "address", key: "address" },
+    { title: "Alamat", dataIndex: "address", key: "address" },
     {
       title: "Actions",
       key: "actions",
@@ -144,12 +128,6 @@ function StudentPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          Add Student
-        </Button>
-      </Space>
-
       <Table
         rowKey="id"
         columns={columns}
@@ -175,10 +153,7 @@ function StudentPage() {
             <Button
               type="primary"
               onClick={handleSubmit}
-              loading={
-                createStudent.isPending ||
-                (editingStudent && updateStudent.isPending)
-              }
+              loading={editingStudent && updateStudent.isPending}
             >
               {editingStudent ? "Update" : "Create"}
             </Button>

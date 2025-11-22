@@ -97,6 +97,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
 
     if (pathname.includes("/dashboardxzx")) {
       if (pathname.includes("/academy/student-draft")) return ["2-9"];
+      if (pathname.includes("/academy/subject-teacher")) return ["2-10"];
       if (pathname.includes("/academy/student")) return ["2-1"];
       if (pathname.includes("/academy/teacher")) return ["2-2"];
       if (pathname.includes("/academy/school-class")) return ["2-3"];
@@ -147,6 +148,11 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           label: <Link href="/dashboardxzx/academy/school-class">Kelas</Link>,
         },
         {
+          key: "2-10",
+          icon: <BookOutlined />,
+          label: <Link href="/dashboardxzx/academy/subject-teacher">Guru Mapel</Link>,
+        },
+        {
           key: "2-4",
           icon: <BookOutlined />,
           label: (
@@ -157,7 +163,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           key: "2-5",
           icon: <BookOutlined />,
           label: (
-            <Link href="/dashboardxzx/academy/time-table">
+            <Link href="/dashboardxzx/academy/time-table/GRADE_1">
               Jadwal Pelajaran
             </Link>
           ),

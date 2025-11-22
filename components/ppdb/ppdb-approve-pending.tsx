@@ -23,17 +23,21 @@ import {
   useDeleteStudentDraft,
   StudentDraftResponse,
 } from "@/hooks/useStudentDraft";
+import { useClassesByGrade } from "@/hooks/useClass";
 import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
 import { Divider } from "antd";
 import { Modal } from "antd";
-import { useClasses } from "@/hooks/useClass";
+import { CreateStudentRequest } from "@/hooks/useStudent";
+import { useCreateParentStudentDraft } from "@/hooks/useParent";
+
 const { Option } = Select;
 
-function PpdbApprovePendingTabs() {
+function PpdbApprovedTabs() {
   const { messageApi } = useAppMessage();
   const [open, setOpen] = useState(false);
   const [updateId, setUpdateId] = useState<string | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<Grade | undefined>();
   const [editingDraft, setEditingDraft] = useState<StudentDraftResponse | null>(
     null
   );
@@ -42,21 +46,21 @@ function PpdbApprovePendingTabs() {
   const { data, isLoading } = useStudentDraftsApprovePending();
   const updateDraft = useUpdateStudentDraft(updateId || "");
   const deleteDraft = useDeleteStudentDraft();
-
+  const createParentStudentDraft = useCreateParentStudentDraft();
+  const { data: classData, isLoading: isLoadingClasses } =
+    useClassesByGrade(selectedGrade);
   // For academic year dropdown
   const { data: activeAcademicYear } = useAcademicYearActive();
-  const { data: classData, isLoading: isLoadingClasses } = useClasses();
 
   const [openModalParents, setOpenModalParents] = useState(false);
   const [selectedParents, setSelectedParents] = useState<any[]>([]);
 
   const [form] = Form.useForm();
 
-
   const handleEdit = (record: StudentDraftResponse) => {
     setEditingDraft(record);
     setUpdateId(record.id);
-
+    setSelectedGrade(record.grade);
     form.setFieldsValue({
       email: record.email,
       fullName: record.fullName,
@@ -68,6 +72,7 @@ function PpdbApprovePendingTabs() {
       draftType: record.draftType,
       status: record.status,
       targetClassId: record.targetClass?.id,
+      targetGrade: record.targetClass?.grade,
       parents:
         record.parents?.map((p) => ({
           fullName: p.fullName || "",
@@ -82,24 +87,52 @@ function PpdbApprovePendingTabs() {
   };
   const handleApprove = async (record: StudentDraftResponse) => {
     if (record.status !== DraftStatus.APPROVED_PENDING) return;
-    setUpdateId(record.id);
+    if (record.targetClass?.grade !== record.grade) {
+      messageApi.error("harap update Target kelas yang sesuai terlebih dahulu");
+      return;
+    }
     try {
-      await updateDraft.mutateAsync(
+      // 🧩 Bentuk data parents dari draft
+      const parentRequests = (record.parents || []).map((p) => ({
+        email: p.email,
+        password: "orangtua123", // default password
+        fullName: p.fullName,
+        phone: p.phone,
+        address: p.address,
+        nik: p.nik,
+        gender: p.gender,
+        isActive: true,
+      }));
+
+      // 🧩 Bentuk data student dari draft
+      const studentRequest: CreateStudentRequest = {
+        email: record.email,
+        password: "siswa123",
+        fullName: record.fullName,
+        schoolId: `${process.env.NEXT_PUBLIC_SCHOOL_ID}`,
+        classId: record.targetClass?.id,
+        enrollmentNumber: record.enrollmentNumber,
+        dob: record.dob,
+        isActive: true,
+        address: record.address,
+        gender: record.gender,
+      };
+
+      // 🚀 Kirim keduanya sekaligus ke endpoint /parents/with-student
+      await createParentStudentDraft.mutateAsync(
+        { studentDraftId: record.id, parentRequests, studentRequest },
         {
-          ...record,
-          status: DraftStatus.APPROVED, // ubah status
-        },
-        {
-          onSuccess: () => {
-            messageApi.success("Student Draft approved");
+          onSuccess: (res) => {
+            messageApi.success(res.message || "Berhasil approve draft!");
+            setOpen(false);
           },
-          onError: (err: any) => {
-            messageApi.error(err.message);
-          },
+          onError: (err: any) => messageApi.error(err.message),
         }
       );
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error(error);
+      messageApi.error(error.message || "Gagal approve draft");
     }
   };
 
@@ -161,6 +194,13 @@ function PpdbApprovePendingTabs() {
       title: "Grade",
       dataIndex: "grade",
       key: "grade",
+    },
+    {
+      title: "Target Class",
+      dataIndex: ["targetClass", "name"],
+      key: "targetClass",
+      render: (_: any, record: any) =>
+        record.targetClass ? record.targetClass.name : "belum ditentukan",
     },
     {
       title: "Gender",
@@ -366,12 +406,33 @@ function PpdbApprovePendingTabs() {
             label="Grade"
             rules={[{ required: true, message: "Please select grade" }]}
           >
-            <Select placeholder="Select grade">
-              {Object.values(Grade).map((g) => (
-                <Option key={g} value={g}>
-                  {g}
-                </Option>
-              ))}
+            <Select
+              placeholder="Select grade"
+              onChange={(value: Grade) => setSelectedGrade(value)}
+            >
+              {Object.values(Grade).map((g) => {
+                const gradeLabelMap: Record<Grade, string> = {
+                  [Grade.GRADE_1]: "Kelas I",
+                  [Grade.GRADE_2]: "Kelas II",
+                  [Grade.GRADE_3]: "Kelas III",
+                  [Grade.GRADE_4]: "Kelas IV",
+                  [Grade.GRADE_5]: "Kelas V",
+                  [Grade.GRADE_6]: "Kelas VI",
+                  [Grade.GRADE_7]: "Kelas VII",
+                  [Grade.GRADE_8]: "Kelas VIII",
+                  [Grade.GRADE_9]: "Kelas IX",
+                  [Grade.GRADE_10]: "Kelas X",
+                  [Grade.GRADE_11]: "Kelas XI",
+                  [Grade.GRADE_12]: "Kelas XII",
+                };
+
+                return (
+                  <Option key={g} value={g}>
+                    {gradeLabelMap[g] ?? g}{" "}
+                    {/* fallback kalau belum didefinisikan */}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
 
@@ -381,17 +442,24 @@ function PpdbApprovePendingTabs() {
             rules={[{ required: true, message: "Please select target class" }]}
           >
             <Select
-              placeholder="Select target class"
+              placeholder={
+                selectedGrade
+                  ? isLoadingClasses
+                    ? "Loading classes..."
+                    : "Select class"
+                  : "Select grade first"
+              }
               loading={isLoadingClasses}
-              disabled={isLoadingClasses}
+              disabled={!selectedGrade || isLoadingClasses}
             >
               {classData?.data?.map((cls) => (
-                <Select.Option key={cls.id} value={cls.id}>
+                <Option key={cls.id} value={cls.id}>
                   {cls.name}
-                </Select.Option>
+                </Option>
               ))}
             </Select>
           </Form.Item>
+
           <Form.Item
             name="draftType"
             label="Draft Type"
@@ -526,4 +594,4 @@ function PpdbApprovePendingTabs() {
   );
 }
 
-export default PpdbApprovePendingTabs;
+export default PpdbApprovedTabs;

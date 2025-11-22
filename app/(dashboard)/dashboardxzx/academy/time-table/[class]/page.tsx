@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
@@ -6,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Grade } from "@/lib/enum";
 import GlobalLoading from "@/components/custom/globalLoading/globalLoading";
 import { useClassesByGrade } from "@/hooks/useClass";
-import StudentPage from "@/components/student/student-1";
+import TimetablePage from "@/components/timetable/time-table";
 
 const gradeLabels: Record<Grade, string> = {
   [Grade.GRADE_1]: "Kelas I",
@@ -43,7 +44,7 @@ const StudentAdminDashboardTabs = () => {
   const handleChange = (key: string) => {
     startTransition(() => {
       setActiveGrade(key as Grade);
-      router.push(`/dashboardxzx/academy/student/${key}`);
+      router.push(`/dashboardxzx/academy/time-table/${key}`);
     });
   };
 
@@ -62,14 +63,14 @@ const StudentAdminDashboardTabs = () => {
             type="card"
             items={
               classData?.data?.length
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ? classData.data.map((cls: any) => ({
+                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  classData.data.map((cls: any) => ({
                     key: cls.id,
                     label: cls.name,
                     children: (
                       <div>
                         <h3>{cls.name}</h3>
-                        <StudentPage id={cls.id}/>
+                        <TimetablePage id={cls.id} />
                       </div>
                     ),
                   }))
@@ -90,6 +91,7 @@ const StudentAdminDashboardTabs = () => {
   return (
     <>
       {(isPending || isLoadingClasses) && <GlobalLoading />}
+      
       <Tabs
         activeKey={activeGrade}
         onChange={handleChange}

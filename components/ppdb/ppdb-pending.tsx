@@ -31,7 +31,7 @@ import {
 } from "@/hooks/useStudentDraft";
 import { DraftStatus, DraftType, Gender, Grade } from "@/lib/enum";
 import { useAcademicYearActive } from "@/hooks/useAcademicYear";
-import { useClasses, useClassesByGrade } from "@/hooks/useClass";
+import { useClassesByGrade } from "@/hooks/useClass";
 import { Divider } from "antd";
 import { Modal } from "antd";
 

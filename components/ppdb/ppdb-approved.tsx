@@ -120,7 +120,7 @@ function PpdbApprovedTabs() {
 
       // 🚀 Kirim keduanya sekaligus ke endpoint /parents/with-student
       await createParentStudentDraft.mutateAsync(
-        { parentRequests, studentRequest },
+        { studentDraftId: record.id, parentRequests, studentRequest },
         {
           onSuccess: (res) => {
             messageApi.success(res.message || "Berhasil approve draft!");

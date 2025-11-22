@@ -113,6 +113,7 @@ export function useCreateParentStudentDraft() {
     { message: string },
     Error,
     {
+      studentDraftId: string;
       parentRequests: CreateParentRequest[];
       studentRequest: CreateStudentRequest;
     }
@@ -129,12 +130,17 @@ export function useCreateParentStudentDraft() {
       return res.data; // berisi { message: "berhasil approve" }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["parents"], exact: true });
-      qc.invalidateQueries({ queryKey: ["students"], exact: true });
+      qc.invalidateQueries({ queryKey: ["parents"] });
+      qc.invalidateQueries({ queryKey: ["students"] });
+      qc.invalidateQueries({
+        queryKey: ["studentDraftsApprovePending"],
+      });
+      qc.invalidateQueries({
+        queryKey: ["studentDraftsApproved"],
+      });
     },
   });
 }
-
 
 // ✅ Update parent
 export function useUpdateParent(id: string) {
