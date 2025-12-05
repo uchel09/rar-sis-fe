@@ -27,8 +27,6 @@ export enum AttendanceStatus {
   PRESENT = "PRESENT",
   ABSENT = "ABSENT",
   SICK = "SICK",
-  PERMISSION = "PERMISSION",
-  LATE = "LATE", // siswa terlambat
   EXCUSED = "EXCUSED", // izin resmi (beda dengan permission biasa)
 }
 

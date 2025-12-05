@@ -20,6 +20,11 @@ export interface UpdateTimetableRequest {
   endTime?: string;
   isActive?: boolean;
 }
+export interface InsertSubjectTeacherRequest {
+  subjectTeacherid: string;
+  isActive?: boolean;
+}
+
 
 export interface TimetableResponse {
   id: string;
@@ -91,6 +96,22 @@ export function useTimetablesByClassId(classId: string, schoolId: string) {
     refetchInterval: false,
   });
 }
+export function useTimetablesByTeacherId(teacherId: string, schoolId: string) {
+  return useQuery<{ data: TimetableResponse[] }>({
+    queryKey: ["timetables", "teacher", teacherId],
+    queryFn: () =>
+      fetcher(
+        `/timetables/teacher?schoolId=${schoolId}&teacherId=${teacherId}`
+      ),
+    enabled: !!teacherId,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+  });
+}
+
 
 // =======================
 // ✅ Create timetable
@@ -116,6 +137,21 @@ export function useUpdateTimetable(id: string) {
   return useMutation<TimetableResponse, Error, UpdateTimetableRequest>({
     mutationFn: (data) =>
       fetcher<TimetableResponse>(`/timetables/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["timetables"] });
+      qc.invalidateQueries({ queryKey: ["timetable", id] });
+    },
+  });
+}
+export function useInsertSubjectTeacher(id: string) {
+  const qc = useQueryClient();
+  return useMutation<TimetableResponse, Error, InsertSubjectTeacherRequest>({
+    mutationFn: (data) =>
+      fetcher<TimetableResponse>(`/timetables/subject-teacher/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },

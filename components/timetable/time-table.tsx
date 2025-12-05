@@ -6,6 +6,7 @@ import { Modal, Select } from "antd";
 import {
   useTimetablesByClassId,
   useUpdateTimetable,
+  useInsertSubjectTeacher,
 } from "@/hooks/useTimetable";
 import GlobalLoading from "@/components/custom/globalLoading/globalLoading";
 import "./time-table.scss";
@@ -46,7 +47,7 @@ export default function TimetablePage({ id }: TimetablePageProps) {
   const [selectedSubjectTeacherId, setSelectedSubjectTeacherId] = useState<
     string | null
   >(null);
-  const updateTimetableMutation = useUpdateTimetable(selectedSlotId ?? "");
+  const updateTimetableMutation = useInsertSubjectTeacher(selectedSlotId ?? "");
 
   if (isLoading || isLoadingST) return <GlobalLoading />;
 
