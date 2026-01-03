@@ -26,7 +26,7 @@ export interface UpdateTeacherRequest {
   nip?: string;
   hireDate?: Date;
   phone: string;
-  gener: Gender;
+  gender: Gender;
   isActive: boolean;
 }
 

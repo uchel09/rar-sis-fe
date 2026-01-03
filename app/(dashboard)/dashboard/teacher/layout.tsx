@@ -5,7 +5,6 @@ import {
   Layout,
   Menu,
   Avatar,
-  Dropdown,
   Typography,
   Select,
   Button,
@@ -24,6 +23,9 @@ import {
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Popover } from "antd";
+import { useLogout } from "@/hooks/useAuth";
+import { useAppMessage } from "@/providers/query-client-provider";
 
 const { Header, Sider } = Layout;
 const { Title } = Typography;
@@ -74,22 +76,60 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [themeColor, setThemeColor] = useState<keyof typeof themes>("putih");
   const [openDrawer, setOpenDrawer] = useState(false);
-
+  const logout = useLogout();
   const currentTheme = themes[themeColor];
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const pathname = usePathname(); // ✅ ambil path aktif
+   const { messageApi } = useAppMessage();
 
-
-  const userMenu = (
-    <Menu
-      items={[
-        { key: "1", icon: <UserOutlined />, label: "Profil" },
-        { key: "2", icon: <SettingOutlined />, label: "Pengaturan" },
-        { type: "divider" },
-        { key: "3", icon: <LogoutOutlined />, label: "Keluar" },
-      ]}
-    />
+   const handleLogout = async () => {
+     try {
+       // pake mutateAsync biar bisa await dan ambil response
+       const response = await logout.mutateAsync();
+       messageApi.success("Anda telah Logout")
+       window.location.replace("/login/school-admin");
+     } catch (err) {
+       console.error("Logout error:", err);
+     }
+   };
+  const content = (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {[
+        {
+          key: "profile",
+          label: "Profil",
+          icon: <UserOutlined />,
+          onClick: () => console.log("Buka Profil"),
+        },
+        {
+          key: "settings",
+          label: "Pengaturan",
+          icon: <SettingOutlined />,
+          onClick: () => console.log("Buka Pengaturan"),
+        },
+        {
+          key: "logout",
+          label: "Keluar",
+          icon: <LogoutOutlined />,
+          onClick:handleLogout,
+        },
+      ].map((item) => (
+        <div
+          key={item.key}
+          style={{
+            padding: 8,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+          onClick={item.onClick}
+        >
+          {item.icon} {item.label}
+        </div>
+      ))}
+    </div>
   );
 
   const selectedKeys = useMemo(() => {
@@ -99,7 +139,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
       if (pathname.includes("/schedule")) return ["2-1"];
       if (pathname.includes("/subject-teacher-attendance")) return ["2-3"];
       if (pathname.includes("/subject-teacher")) return ["2-2"];
-    
+
       // dst mapping sesuai kebutuhan
       return ["1"];
     }
@@ -121,28 +161,26 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
         {
           key: "2-1",
           icon: <TeamOutlined />,
-          label: (
-            <Link
-              href={`/dashboard/teacher/schedule`}
-            >
-              Jadwal Mapel
-            </Link>
-          ),
+          label: <Link href={`/dashboard/teacher/schedule`}>Jadwal Mapel</Link>,
         },
         {
           key: "2-2",
           icon: <UserOutlined />,
-          label: <Link href="/dashboard/teacher/subject-teacher">Guru Mapel</Link>,
+          label: (
+            <Link href="/dashboard/teacher/subject-teacher">Guru Mapel</Link>
+          ),
         },
         {
           key: "2-3",
           icon: <BookOutlined />,
-          label: <Link href="/dashboard/teacher/subject-teacher-attendance">Kehadiran Siswa</Link>,
+          label: (
+            <Link href="/dashboard/teacher/subject-teacher-attendance">
+              Kehadiran Siswa
+            </Link>
+          ),
         },
-        
       ],
     },
-    
   ];
 
   const sidebarMenu = (
@@ -155,6 +193,8 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
       selectedKeys={selectedKeys} // ✅ ini yang bikin aktif
     />
   );
+
+   
 
   return (
     <Layout style={{ minHeight: "100vh", background: currentTheme.content }}>
@@ -269,16 +309,9 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
                 color: themeColor === "putih" ? currentTheme.text : "#fff",
               }}
             />
-            <Dropdown menu={userMenu} placement="bottomRight">
-              <Avatar
-                style={{
-                  backgroundColor: "#fff",
-                  color: currentTheme.text,
-                  cursor: "pointer",
-                }}
-                icon={<UserOutlined />}
-              />
-            </Dropdown>
+            <Popover content={content} trigger="click" placement="bottomRight">
+              <Avatar icon={<UserOutlined />} style={{ cursor: "pointer" }} />
+            </Popover>
           </div>
         </Header>
 

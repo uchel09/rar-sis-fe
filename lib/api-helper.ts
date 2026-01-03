@@ -1,3 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export class FetcherError extends Error {
+  data: any;
+
+  constructor(data: any) {
+    super(data?.errors?.message || "Internal Server Error"); // tetap set message biar kompatibel
+    this.data = data;
+  }
+}
+
 export async function fetcher<T>(
   url: string,
   options?: RequestInit
@@ -12,7 +22,8 @@ export async function fetcher<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.errors|| "Internal Server Error" );
+    console.log(error);
+    throw error
   }
 
   return res.json();
