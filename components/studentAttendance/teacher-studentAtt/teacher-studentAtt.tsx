@@ -93,7 +93,6 @@ export default function TeacherStudentAtt({
                 <div style={{ padding: "1rem" }}>
                   <TeacherStudentAttTab
                    
-                    schoolId={schoolId}
                     classId={cls.classId}
                     subjectTeacherId={subj.subjectTeacherId}
                   />

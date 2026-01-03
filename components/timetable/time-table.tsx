@@ -5,7 +5,6 @@ import { SetStateAction, useState } from "react";
 import { Modal, Select } from "antd";
 import {
   useTimetablesByClassId,
-  useUpdateTimetable,
   useInsertSubjectTeacher,
 } from "@/hooks/useTimetable";
 import GlobalLoading from "@/components/custom/globalLoading/globalLoading";

@@ -125,7 +125,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
             <Link
               href={`/dashboard/teacher/schedule`}
             >
-              Siswa
+              Jadwal Mapel
             </Link>
           ),
         },
