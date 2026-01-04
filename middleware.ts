@@ -4,35 +4,56 @@ import jwt from "jsonwebtoken";
 
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
+  const pathname = req.nextUrl.pathname;
 
-  // jika tidak ada token → biarkan lanjut ke login
-  if (!token) return NextResponse.next();
+  // belum login → cuma boleh ke login
+  if (!token) {
+    if (pathname.startsWith("/dashboard")) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    return NextResponse.next();
+  }
 
   try {
-    // decode token di edge runtime
     const payload = jwt.decode(token) as { role?: string } | null;
-
     if (!payload?.role) return NextResponse.next();
 
-    const { role } = payload;
+    const role = payload.role;
 
-    // redirect default kalau user coba akses login
-    if (req.nextUrl.pathname.startsWith("/login")) {
-      let redirectUrl = "/dashboard";
+    // =========================
+    // MAP ROLE → DASHBOARD
+    // =========================
+    const roleDashboardMap: Record<string, string> = {
+      ADMIN: "/dashboard/admin",
+      TEACHER: "/dashboard/teacher",
+      STUDENT: "/dashboard/student",
+    };
 
-      if (role === "TEACHER") redirectUrl = "/dashboard/teacher";
-      if (role === "STUDENT") redirectUrl = "/dashboard/student";
-      if (role === "ADMIN") redirectUrl = "/dashboardxyz/admin";
+    const allowedBasePath = roleDashboardMap[role];
 
-      return NextResponse.redirect(new URL(redirectUrl, req.url));
+    // =========================
+    // 1. AKSES /LOGIN
+    // =========================
+    if (pathname.startsWith("/login")) {
+      return NextResponse.redirect(new URL(allowedBasePath, req.url));
+    }
+
+    // =========================
+    // 2. AKSES DASHBOARD SALAH ROLE
+    // =========================
+    if (
+      pathname.startsWith("/dashboard") &&
+      !pathname.startsWith(allowedBasePath)
+    ) {
+      return NextResponse.redirect(new URL(allowedBasePath, req.url));
     }
 
     return NextResponse.next();
-  } catch (err) {
+  } catch {
     return NextResponse.next();
   }
 }
 
 export const config = {
-  matcher: ["/login/:path*", "/dashboard/:path*"], // bisa custom sesuai kebutuhan
+  matcher: ["/login/:path*", "/dashboard/:path*"],
 };
