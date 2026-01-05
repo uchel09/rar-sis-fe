@@ -36,7 +36,7 @@ const dayLabels: Record<string, string> = {
 export default function TimetablePage({ id }: TimetablePageProps) {
   const { data, isLoading } = useTimetablesByClassId(
     id,
-    "a352d11d-3407-4a71-a299-031e3d22c5c8"
+    process.env.NEXT_PUBLIC_SCHOOL_ID || ""
   );
 
   const { data: subjectTeachers, isLoading: isLoadingST } =

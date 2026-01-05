@@ -225,15 +225,15 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           icon: <BellOutlined />,
           label: <Link href="/dashboardxzx/academy/parent">Parents</Link>,
         },
-        // {
-        //   key: "2-9",
-        //   icon: <TeamOutlined />,
-        //   label: (
-        //     <Link href="/dashboardxzx/academy/student-draft">
-        //       Pengantar Siswa
-        //     </Link>
-        //   ),
-        // },
+        {
+          key: "2-9",
+          icon: <TeamOutlined />,
+          label: (
+            <Link href="/dashboardxzx/academy/student-draft">
+              Pengantar Siswa
+            </Link>
+          ),
+        },
       ],
     },
     {

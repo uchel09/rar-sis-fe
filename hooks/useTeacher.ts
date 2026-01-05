@@ -127,3 +127,49 @@ export function useDeleteTeacher() {
       qc.invalidateQueries({ queryKey: ["teachers"], exact: true }),
   });
 }
+
+
+// ===============================
+// 🧪 CREATE DUMMY TEACHERS (20)
+// ===============================
+export function useCreateDummyTeacher() {
+  const qc = useQueryClient();
+
+  return useMutation<{ message: string; count: number }, Error>({
+    mutationFn: () =>
+      fetcher<{ message: string; count: number }>("/teachers/dummy", {
+        method: "POST",
+      }),
+
+    onSuccess: () => {
+      // 🔥 refresh list teacher
+      qc.invalidateQueries({ queryKey: ["teachers"] });
+
+      // opsional tapi aman
+      qc.removeQueries({ queryKey: ["teacher"] });
+    },
+  });
+}
+
+// ===============================
+// 🗑️ DELETE DUMMY TEACHERS
+// ===============================
+export function useDeleteDummyTeacher() {
+  const qc = useQueryClient();
+
+  return useMutation<{ message: string; count: number }, Error>({
+    mutationFn: () =>
+      fetcher<{ message: string; count: number }>("/teachers/dummy", {
+        method: "DELETE",
+      }),
+
+    onSuccess: () => {
+      // 💣 hapus cache teacher total
+      qc.removeQueries({ queryKey: ["teachers"] });
+      qc.removeQueries({ queryKey: ["teacher"] });
+
+      // optional: langsung refetch
+      qc.invalidateQueries({ queryKey: ["teachers"] });
+    },
+  });
+}

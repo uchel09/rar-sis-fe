@@ -11,29 +11,37 @@ export interface FindMe {
   email: string;
   fullName: string;
   role: string;
-  profileId: string | null;
+  profile: {
+    id: string
+  } 
 }
 export interface LoginResponse {
   message: string;
-  user: FindMe
+  user: FindMe;
 }
 
 // ==========================
 // ✅ Get current logged-in user
 // ==========================
 export function useMe() {
-  return useQuery<FindMe>({
+  return useQuery<
+    { data: FindMe }, // ⬅️ data dari queryFn (API response)
+    Error,
+    FindMe // ⬅️ data SETELAH select
+  >({
     queryKey: ["me"],
     queryFn: () =>
-      fetcher<FindMe>("/users/me", {
+      fetcher<{ data: FindMe }>("/users/me", {
         method: "GET",
         credentials: "include",
       }),
-    staleTime: 1000 * 60 * 5, // 5 menit
+    select: (res) => res.data, // 🔥 unwrap
+    staleTime: 1000 * 60 * 60 * 24,
     refetchOnWindowFocus: false,
     retry: 10,
   });
 }
+
 
 // ==========================
 // ✅ Login

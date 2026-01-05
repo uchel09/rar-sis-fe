@@ -24,7 +24,7 @@ export function middleware(req: NextRequest) {
     // MAP ROLE → DASHBOARD
     // =========================
     const roleDashboardMap: Record<string, string> = {
-      ADMIN: "/dashboard/admin",
+      SCHOOL_ADMIN: "/dashboardxzx",
       TEACHER: "/dashboard/teacher",
       STUDENT: "/dashboard/student",
     };
@@ -55,5 +55,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login/:path*", "/dashboard/:path*"],
+  matcher: ["/login/:path*", "/dashboard/:path*", "/dashboardxzx/:path*"],
 };

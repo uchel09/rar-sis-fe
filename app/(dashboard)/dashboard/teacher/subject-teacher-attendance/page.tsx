@@ -1,14 +1,29 @@
+"use client";
+
 import TeacherStudentAtt from "@/components/studentAttendance/teacher-studentAtt/teacher-studentAtt";
+import { useMe } from "@/hooks/useAuth";
 
-import React from 'react'
+const SubjectTeacherAttendancePage = () => {
+  const { data: me, isLoading, isError } = useMe();
 
-const page = () => {
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isError || !me) {
+    return <div>Unauthorized</div>;
+  }
+
+  if (!me.profile?.id) {
+    return <div>Profil guru belum lengkap</div>;
+  }
+
   return (
     <TeacherStudentAtt
-      teacherId="6cd061b1-1607-422b-bf6f-a75fccbc4793"
-      schoolId="a352d11d-3407-4a71-a299-031e3d22c5c8"
+      teacherId={me.profile.id}
+      schoolId={process.env.NEXT_PUBLIC_SCHOOL_ID||""}
     />
   );
-}
+};
 
-export default page
+export default SubjectTeacherAttendancePage;

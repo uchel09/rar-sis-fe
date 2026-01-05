@@ -13,9 +13,9 @@ import {
   Space,
   Popconfirm,
   Switch,
-  Select
+  Select,
 } from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
   useTeachers,
@@ -23,8 +23,11 @@ import {
   useUpdateTeacher,
   useDeleteTeacher,
   TeacherResponse,
+  useCreateDummyTeacher,
+  useDeleteDummyTeacher,
 } from "@/hooks/useTeacher";
 import { Gender } from "@/lib/enum";
+import { Modal } from "antd";
 
 function TeacherPage() {
   const { data, isLoading } = useTeachers();
@@ -32,6 +35,8 @@ function TeacherPage() {
   const [updateId, setUpdateId] = useState<string | null>(null);
   const updateTeacher = useUpdateTeacher(updateId || "");
   const deleteTeacher = useDeleteTeacher();
+  const createDummy = useCreateDummyTeacher();
+  const deleteDummy = useDeleteDummyTeacher();
   const { messageApi } = useAppMessage();
 
   const [form] = Form.useForm();
@@ -39,7 +44,7 @@ function TeacherPage() {
   const [editingTeacher, setEditingTeacher] = useState<TeacherResponse | null>(
     null
   );
-  console.log(data)
+  console.log(data);
 
   const handleCreate = () => {
     setEditingTeacher(null);
@@ -104,13 +109,44 @@ function TeacherPage() {
     });
   };
 
+  const handleCreateDummy = () => {
+    createDummy.mutate(undefined, {
+      onSuccess: (res) => {
+        messageApi.success("20 dummy teacher created");
+      },
+      onError: (err: any) => {
+        messageApi.error(err?.message || "Gagal membuat dummy teacher");
+      },
+    });
+  };
+
+  // ===============================
+  // 🗑️ DELETE DUMMY TEACHER (CONFIRM)
+  // ===============================
+ const handleDeleteDummy = () => {
+   const ok = window.confirm(
+     "Yakin mau hapus semua dummy teacher?\nData tidak bisa dikembalikan."
+   );
+
+   if (!ok) return;
+
+   deleteDummy.mutate(undefined, {
+     onSuccess: (res) => {
+       messageApi.success(res.message);
+     },
+     onError: () => {
+       messageApi.error("Gagal menghapus dummy teacher");
+     },
+   });
+ };
+
   const columns = [
     { title: "Full Name", dataIndex: ["user", "fullName"], key: "fullName" },
     { title: "Email", dataIndex: ["user", "email"], key: "email" },
     { title: "Phone", dataIndex: "phone", key: "phone" },
     { title: "NIK", dataIndex: "nik", key: "nik" },
     { title: "NIP", dataIndex: "nip", key: "nip" },
-    { title: "Gender", dataIndex:["user", "gender"], key: "gender" },
+    { title: "Gender", dataIndex: ["user", "gender"], key: "gender" },
     {
       title: "DOB",
       dataIndex: "dob",
@@ -149,6 +185,22 @@ function TeacherPage() {
       <Space style={{ marginBottom: 16 }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           Add Teacher
+        </Button>
+        <Button
+          style={{ backgroundColor: "#c47404ff", marginLeft: "20px" }}
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleCreateDummy}
+        >
+          Generate Custom Teacher
+        </Button>
+        <Button
+          style={{ backgroundColor: "#ff0808ff", marginLeft: "20px" }}
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={handleDeleteDummy}
+        >
+          Reset Teacher
         </Button>
       </Space>
 
