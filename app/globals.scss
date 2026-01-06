@@ -1,6 +1,22 @@
 :root {
+  /* Colors */
+  --primary: #2563eb;
+  /* Blue 600 */
+  --primary-hover: #1d4ed8;
+  /* Blue 700 */
+  --secondary: #64748b;
+  /* Slate 500 */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  /* Slate 900 */
+  --muted: #f1f5f9;
+  /* Slate 100 */
+  --border: #e2e8f0;
+  /* Slate 200 */
+
+  /* Spacing */
+  --container-width: 1200px;
+  --radius: 0.5rem;
 }
 
 html,
@@ -68,21 +84,31 @@ table {
 }
 
 /* Headings reset */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: normal;
 }
 
 /* Form elements reset */
-fieldset, legend {
+fieldset,
+legend {
   border: none;
   padding: 0;
 }
 
 /* Remove quotes in blockquote & q */
-blockquote, q {
+blockquote,
+q {
   quotes: none;
 }
-blockquote::before, blockquote::after,
-q::before, q::after {
+
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
   content: '';
 }
