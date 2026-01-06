@@ -186,10 +186,9 @@ export function useGenerateWeeklyTimetables() {
     mutationFn: ({ schoolId }) =>
       fetcher<{ message: string }>(`/timetables/generate-tt`, {
         method: "POST",
-        body: JSON.stringify(schoolId),
+        body: JSON.stringify({ schoolId }),
         headers: { "Content-Type": "application/json" },
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["timetables"] }),
   });
 }
-

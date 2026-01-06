@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import styles from "./school-admin.login.module.scss";
 import { useLogin } from "@/hooks/useAuth";
 import { useAppMessage } from "@/providers/query-client-provider";
-import { useRouter } from "next/navigation";
 import GlobalLoading from "@/components/custom/globalLoading/globalLoading";
 
 export default function Login() {
@@ -29,8 +28,8 @@ export default function Login() {
           if (role === "TEACHER") window.location.replace("/dashboard/teacher");
           else if (role === "STUDENT")
             window.location.replace("/dashboard/student");
-          else if (role === "ADMIN")
-            window.location.replace("/dashboardxyz/admin");
+          else if (role === "SCHOOL_ADMIN")
+            window.location.replace("/dashboardxzx");
           else window.location.replace("/");
           
         },
