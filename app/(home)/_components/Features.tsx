@@ -46,15 +46,15 @@ export default function Features() {
         <section id="features" className={`${styles.section} ${styles.features}`}>
             <div className={styles.container}>
                 <div className={styles.featuresHeaders}>
-                    <h2>Fitur Unggulan</h2>
-                    <p>
+                    <h2 className={styles.fadeUp}>Fitur Unggulan</h2>
+                    <p className={`${styles.fadeUp} ${styles.delay1}`}>
                         Semua yang Anda butuhkan untuk mengelola sekolah modern ada di sini.
                     </p>
                 </div>
 
                 <div className={styles.featureGrid}>
                     {features.map((feature, idx) => (
-                        <div key={idx} className={styles.featureCard}>
+                        <div key={idx} className={`${styles.featureCard} ${styles.fadeUp}`} style={{ animationDelay: `${(idx + 1) * 0.1}s` }}>
                             <div className={styles.iconWrapper}>{feature.icon}</div>
                             <h3>{feature.title}</h3>
                             <p>{feature.desc}</p>
