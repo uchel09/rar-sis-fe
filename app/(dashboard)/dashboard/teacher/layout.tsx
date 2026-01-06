@@ -88,7 +88,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
        // pake mutateAsync biar bisa await dan ambil response
        const response = await logout.mutateAsync();
        messageApi.success("Anda telah Logout")
-       window.location.replace("/login/school-admin");
+       window.location.replace("/login");
      } catch (err) {
        console.error("Logout error:", err);
      }
