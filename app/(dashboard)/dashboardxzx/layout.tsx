@@ -5,7 +5,7 @@ import {
   Layout,
   Menu,
   Avatar,
- 
+
   Typography,
   Select,
   Button,
@@ -22,7 +22,7 @@ import {
   BellOutlined,
   MenuOutlined,
 } from "@ant-design/icons";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLogout } from "@/hooks/useAuth";
 import { useAppMessage } from "@/providers/query-client-provider";
@@ -82,6 +82,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const pathname = usePathname(); // ✅ ambil path aktif
+  const router = useRouter();
   const { messageApi } = useAppMessage();
   const handleLogout = async () => {
     try {
@@ -100,13 +101,13 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           key: "profile",
           label: "Profil",
           icon: <UserOutlined />,
-          onClick: () => console.log("Buka Profil"),
+          onClick: () => router.push("/dashboardxzx/profile"),
         },
         {
           key: "settings",
           label: "Pengaturan",
           icon: <SettingOutlined />,
-          onClick: () => console.log("Buka Pengaturan"),
+          onClick: () => router.push("/dashboardxzx/settings"),
         },
         {
           key: "logout",
@@ -470,8 +471,8 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           .ant-layout-sider-trigger {
             background: ${currentTheme.sidebarCard} !important;
             color: ${themeColor === "putih"
-              ? currentTheme.text
-              : "#fff"} !important;
+            ? currentTheme.text
+            : "#fff"} !important;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
           }
           .ant-layout-sider-trigger:hover {

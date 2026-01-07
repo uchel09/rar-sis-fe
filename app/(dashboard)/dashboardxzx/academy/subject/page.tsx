@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useAppMessage } from "@/providers/query-client-provider";
-import { Table, Button, Drawer, Form, Input, Space, Popconfirm } from "antd";
+import { Table, Button, Drawer, Form, Input, Space, Popconfirm, Select } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   useSubjects,
@@ -12,9 +12,7 @@ import {
   useDeleteSubject,
   SubjectResponse,
 } from "@/hooks/useSubject";
-import { Option } from "antd/es/mentions";
 import { Grade } from "@/lib/enum";
-import { Select } from "antd";
 
 function SubjectPage() {
   const { data, isLoading } = useSubjects();
@@ -196,10 +194,10 @@ function SubjectPage() {
                 };
 
                 return (
-                  <Option key={g} value={g}>
+                  <Select.Option key={g} value={g}>
                     {gradeLabelMap[g] ?? g}{" "}
                     {/* fallback kalau belum didefinisikan */}
-                  </Option>
+                  </Select.Option>
                 );
               })}
             </Select>

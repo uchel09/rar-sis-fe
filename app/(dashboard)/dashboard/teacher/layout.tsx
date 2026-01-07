@@ -81,18 +81,19 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
   const pathname = usePathname(); // ✅ ambil path aktif
-   const { messageApi } = useAppMessage();
+  const router = useRouter(); // ✅ initialize router
+  const { messageApi } = useAppMessage();
 
-   const handleLogout = async () => {
-     try {
-       // pake mutateAsync biar bisa await dan ambil response
-       const response = await logout.mutateAsync();
-       messageApi.success("Anda telah Logout")
-       window.location.replace("/login");
-     } catch (err) {
-       console.error("Logout error:", err);
-     }
-   };
+  const handleLogout = async () => {
+    try {
+      // pake mutateAsync biar bisa await dan ambil response
+      const response = await logout.mutateAsync();
+      messageApi.success("Anda telah Logout")
+      window.location.replace("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
   const content = (
     <div style={{ display: "flex", flexDirection: "column" }}>
       {[
@@ -100,19 +101,19 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           key: "profile",
           label: "Profil",
           icon: <UserOutlined />,
-          onClick: () => console.log("Buka Profil"),
+          onClick: () => router.push("/dashboard/teacher/profile"),
         },
         {
           key: "settings",
           label: "Pengaturan",
           icon: <SettingOutlined />,
-          onClick: () => console.log("Buka Pengaturan"),
+          onClick: () => router.push("/dashboard/teacher/settings"),
         },
         {
           key: "logout",
           label: "Keluar",
           icon: <LogoutOutlined />,
-          onClick:handleLogout,
+          onClick: handleLogout,
         },
       ].map((item) => (
         <div
@@ -194,7 +195,7 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
     />
   );
 
-   
+
 
   return (
     <Layout style={{ minHeight: "100vh", background: currentTheme.content }}>
@@ -359,8 +360,8 @@ function DashboardAdminLayout({ children }: { children: React.ReactNode }) {
           .ant-layout-sider-trigger {
             background: ${currentTheme.sidebarCard} !important;
             color: ${themeColor === "putih"
-              ? currentTheme.text
-              : "#fff"} !important;
+            ? currentTheme.text
+            : "#fff"} !important;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
           }
           .ant-layout-sider-trigger:hover {
