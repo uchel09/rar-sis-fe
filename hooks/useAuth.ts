@@ -12,12 +12,20 @@ export interface FindMe {
   fullName: string;
   role: string;
   profile: {
-    id: string
-  } 
+    id: string;
+  } | null;
+  profileId?: string | null;
+}
+export interface LoginUser {
+  id: string;
+  email: string;
+  fullName: string;
+  role: string;
+  profileId: string | null;
 }
 export interface LoginResponse {
   message: string;
-  user: FindMe;
+  user: LoginUser;
 }
 
 // ==========================

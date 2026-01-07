@@ -105,12 +105,17 @@ export function useDeleteBulkAttendance() {
     Error,
     GenerateBulkAttendanceRequest
   >({
-    mutationFn: (body) =>
-      fetcher("/attendances/bulk", {
+    mutationFn: (body) => {
+      const query = new URLSearchParams({
+        classId: body.classId,
+        subjectTeacherId: body.subjectTeacherId,
+        semester: body.semester,
+      });
+
+      return fetcher(`/attendances/bulk?${query.toString()}`, {
         method: "DELETE",
-        body: JSON.stringify(body),
-        headers: { "Content-Type": "application/json" },
-      }),
+      });
+    },
   });
 }
 

@@ -14,13 +14,14 @@ const SubjectTeacherAttendancePage = () => {
     return <div>Unauthorized</div>;
   }
 
-  if (!me.profile?.id) {
+  const profileId = me.profile?.id;
+  if (!profileId) {
     return <div>Profil guru belum lengkap</div>;
   }
 
   return (
     <TeacherStudentAtt
-      teacherId={me.profile.id}
+      teacherId={profileId}
       schoolId={process.env.NEXT_PUBLIC_SCHOOL_ID||""}
     />
   );

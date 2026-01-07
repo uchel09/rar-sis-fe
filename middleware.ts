@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-type JwtPayload = { role?: string };
+type JwtPayload = { role?: string; exp?: number };
 
 function decodeJwtPayload(token: string): JwtPayload | null {
   const parts = token.split(".");
@@ -21,13 +21,19 @@ function decodeJwtPayload(token: string): JwtPayload | null {
   }
 }
 
+function isTokenExpired(exp?: number): boolean {
+  if (!exp) return true;
+  return exp * 1000 <= Date.now();
+}
+
 export function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
   const pathname = req.nextUrl.pathname;
+  const requiresAuth = pathname.startsWith("/dashboard");
 
   // belum login → cuma boleh ke login
   if (!token) {
-    if (pathname.startsWith("/dashboard")) {
+    if (requiresAuth) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
     return NextResponse.next();
@@ -36,7 +42,13 @@ export function middleware(req: NextRequest) {
   try {
     const payload = decodeJwtPayload(token);
     const role = payload?.role;
-    if (!role) return NextResponse.next();
+    if (!payload || !role || isTokenExpired(payload.exp)) {
+      const res = requiresAuth
+        ? NextResponse.redirect(new URL("/login", req.url))
+        : NextResponse.next();
+      res.cookies.set("access_token", "", { path: "/", maxAge: 0 });
+      return res;
+    }
 
     // =========================
     // MAP ROLE → DASHBOARD
@@ -66,14 +78,14 @@ export function middleware(req: NextRequest) {
     }
 
     if (allowedBasePath === null) {
-      if (pathname.startsWith("/dashboard")) {
+      if (requiresAuth) {
         return NextResponse.redirect(new URL("/", req.url));
       }
       return NextResponse.next();
     }
 
     if (!allowedBasePath) {
-      if (pathname.startsWith("/dashboard")) {
+      if (requiresAuth) {
         return NextResponse.redirect(new URL("/login", req.url));
       }
       return NextResponse.next();
@@ -83,7 +95,7 @@ export function middleware(req: NextRequest) {
     // 2. AKSES DASHBOARD SALAH ROLE
     // =========================
     if (
-      pathname.startsWith("/dashboard") &&
+      requiresAuth &&
       !pathname.startsWith(allowedBasePath)
     ) {
       return NextResponse.redirect(new URL(allowedBasePath, req.url));
